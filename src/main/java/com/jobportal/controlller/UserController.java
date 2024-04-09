@@ -1,9 +1,11 @@
 package com.jobportal.controlller;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,10 +24,13 @@ import com.jobportal.dto.UpdateUserProfileRequest;
 import com.jobportal.dto.UserLoginRequest;
 import com.jobportal.dto.UserLoginResponse;
 import com.jobportal.dto.UserResponseDto;
+import com.jobportal.entity.User;
 import com.jobportal.entity.UserEducation;
 import com.jobportal.entity.UserSkill;
 import com.jobportal.entity.UserWorkExperience;
 import com.jobportal.resource.UserResource;
+import com.jobportal.service.UserService;
+import com.jobportal.service.UserServiceImpl;
 import com.lowagie.text.DocumentException;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +43,9 @@ public class UserController {
 
 	@Autowired
 	private UserResource userResource;
+	
+	@Autowired
+	private UserService userService;
 
 	// RegisterUserRequestDto, we will set only email, password & role from UI
 	@PostMapping("/admin/register")
@@ -69,7 +77,20 @@ public class UserController {
 	public ResponseEntity<UserResponseDto> fetchAllUsersByRole(@RequestParam("role") String role) {
 		return userResource.getUsersByRole(role);
 	}
-
+	
+	@GetMapping("/fetch/email")
+    @Operation(summary = "Api to get Users By Role")
+    public ResponseEntity<UserResponseDto> fetchAllUsersByEmail(@RequestParam("emailId") String emailId) {
+        return userResource.getUsersByEmail(emailId);
+    }
+	
+	@PutMapping("update/password")
+	public ResponseEntity<UserResponseDto> updatePassword(@RequestBody Map<String, String> requestBody){
+		String emailId = requestBody.get("emailId");
+		String password = requestBody.get("password");
+		return userResource.updateUserPassword(emailId, password);
+	}
+	
 	@DeleteMapping("delete")
 	@Operation(summary = "Api to delete the user")
 	public ResponseEntity<CommonApiResponse> deleteUser(@RequestParam("userId") int userId) {
@@ -81,6 +102,7 @@ public class UserController {
 	public ResponseEntity<UserResponseDto> fetchUserById(@RequestParam("userId") int userId) {
 		return userResource.fetchUserById(userId);
 	}
+	
 
 	@PutMapping("/profile/add")
 	@Operation(summary = "Api to update the user profile")

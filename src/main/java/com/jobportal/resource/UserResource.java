@@ -595,5 +595,60 @@ public class UserResource {
                 .body(resource);
 
 	}
+
+	public ResponseEntity<UserResponseDto> getUsersByEmail(String emailId) {
+        UserResponseDto response = new UserResponseDto();
+
+        if (emailId == null || emailId.isEmpty()) {
+            response.setResponseMessage("Missing email");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        User user = userService.getUserByEmailid(emailId);
+
+        if (user == null) {
+            response.setResponseMessage("User not found");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        response.getUsers().add(user); // Assuming UserResponseDto has a List<User> getUsers() method
+        response.setResponseMessage("User Fetched Successfully");
+        response.setSuccess(true);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 	
+	public ResponseEntity<UserResponseDto> updateUserPassword(String emailId, String password) {
+		UserResponseDto response = new UserResponseDto();
+		
+		if(emailId == null || emailId.isEmpty()) {
+			response.setResponseMessage("missing email");
+			response.setSuccess(false);
+	        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		}
+		
+		if (password == null || password.isEmpty()) {
+            response.setResponseMessage("Missing new password");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+		
+		User user = userService.getUserByEmailid(emailId);
+		
+		if (user == null) {
+            response.setResponseMessage("User not found");
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+		String hashedPassword = passwordEncoder.encode(password);
+        user.setPassword(hashedPassword);
+        userService.updateUser(user);
+
+        response.setResponseMessage("Password updated successfully");
+        response.setSuccess(true);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

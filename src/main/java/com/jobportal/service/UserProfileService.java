@@ -9,5 +9,7 @@ public interface UserProfileService {
 	UserProfile update(UserProfile userProfile);
 
 	UserProfile getById(int userProfileId);
+	
+	
 
 }
